@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Samangile Investments & Projects Online Store</title>
   <meta name="description" content="Samangile Investments & Projects online store - clothing, electronics, stationery, office furniture and household essentials." />
-  <script src="https://www.paypal.com/sdk/js?client-id=AZerQdfFxAV_CyemShTniaboLt30kPrwEy3_caKxj8KmsIknAuGf5aOWDfymebfUjYr-jmQOzW4ZaLou&currency=ZAR"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AZerQdfFxAV_CyemShTniaboLt30kPrwEy3_caKxj8KmsIknAuGf5aOWDfymebfUjYr-jmQOzW4ZaLou&currency=USD"></script>
   <style>
     :root{--purple:#0f6b2b;--purple2:#15803d;--gold:#a3e635;--white:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f8fafc;--ok:#16a34a;--danger:#ef4444;--radius:24px;--shadow:0 20px 60px rgba(15,23,42,.14)}
     *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}html{scroll-behavior:smooth}body{background:#fff;color:var(--ink);overflow-x:hidden}.hide{display:none!important}a{color:inherit;text-decoration:none}button{font:inherit}.container{width:min(1200px,calc(100% - 32px));margin:auto}.admin-login-strip{background:#fff;color:#4b1d72;text-align:right;font-size:11px;padding:5px 16px;border-bottom:1px solid var(--line)}.admin-login-strip button{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--gold);background:#fff;color:#4b1d72;font-weight:900;cursor:pointer}.top-strip{background:linear-gradient(90deg,var(--purple),#052e16);color:#fff;text-align:center;font-size:13px;padding:9px}.top-strip b{color:var(--gold)}
@@ -37,7 +37,7 @@
   <div class="modal" id="loginModal"><h2>Login / Register</h2><p class="meta">Admin and client rights are controlled from the Users tab.</p><div class="field"><label>Email</label><input id="loginEmail" type="email"></div><div class="field"><label>Password</label><input id="loginPassword" type="password"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="loginUser()">Login</button><button class="btn" onclick="registerClient()">Register Client</button><button class="btn gold" onclick="registerAdmin()">Admin Registration</button><button class="btn" onclick="closeAll()">Close</button></div><div id="loginMessage" class="meta" style="margin-top:10px"></div></div>
   <div class="modal" id="checkoutModal"><h2>Checkout</h2><div id="checkoutLines" class="meta" style="margin:10px 0"></div><div class="field"><label>Name</label><input id="checkoutName"></div><div class="field"><label>Phone / WhatsApp</label><input id="checkoutPhone"></div><div class="field"><label>Email</label><input id="checkoutEmail" type="email"></div><div class="field"><label>Delivery Address</label><textarea id="checkoutAddress" rows="3"></textarea></div><div id="paypal-button-container" style="margin-bottom:12px"></div><button class="btn primary" style="width:100%;margin-bottom:8px" onclick="checkout('EFT / Manual Payment')">Checkout: EFT / Manual</button><button class="btn" style="width:100%;margin-bottom:8px" onclick="checkout('Cash on Delivery')">Checkout: Cash on Delivery</button><button class="btn" style="width:100%" onclick="closeAll()">Close</button></div>
 <script>
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwDI2Abp_DdYvS8DmMLN_U64hYXYGoiIDk4hu8_VPb2EGGpwtP-eY4OTXLiA7YqSv3h/exec'; // Optional: paste deployed Apps Script Web App URL here when hosting this HTML outside Apps Script
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwDI2Abp_DdYvS8DmMLN_U64hYXYGoiIDk4hu8_VPb2EGGpwtP-eY4OTXLiA7YqSv3h/exec';
 function backendUrl(){return APPS_SCRIPT_URL || (location.href.includes('script.google.com/macros/s/') ? location.href.split('?')[0] : '');}
 const PRODUCT_SHEET_ID='1BiTXu0sW0cTwTGhXEsuNmy6_5VmLZx8rMEq3EzgqujQ';
 const PRODUCT_TAB='Samangile';
@@ -49,8 +49,10 @@ let products=[],currentUser=JSON.parse(localStorage.getItem('samangile_user')||'
 function hasServer(){return (typeof google!=='undefined'&&google.script&&google.script.run)||!!backendUrl();}
 document.getElementById('year').textContent=new Date().getFullYear();
 function money(v){return 'R'+Number(v||0).toFixed(2)}function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000)}function startSync(label='Synchronising...'){const btn=document.activeElement&&document.activeElement.tagName==='BUTTON'?document.activeElement:null;if(!btn)return()=>{};const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='⏳ '+label;return()=>{btn.disabled=false;btn.innerHTML=original}}function toggleMobileNav(){mobileNav.classList.toggle('hide')}function isAdmin(){if(!currentUser)return false;const v=`${currentUser.Role||''} ${currentUser.Rights||''} ${currentUser.Status||''}`.toLowerCase();return v.includes('admin')}function userRoleLabel(){if(!currentUser)return 'Client';return currentUser.Role||currentUser.Rights||currentUser.Status||'Client'}function updateUserUI(){const loggedIn=!!currentUser;const adminUser=isAdmin();const displayName=currentUser?(currentUser.Name||currentUser.Email||'Logged in user'):'Guest';userChip.textContent=loggedIn?`${displayName} · ${userRoleLabel()}`:'Guest';loginBtn.classList.toggle('hide',loggedIn);logoutBtn.classList.toggle('hide',!loggedIn);adminNav.classList.toggle('hide',!adminUser);if(typeof mobileAdminNav!=='undefined')mobileAdminNav.classList.toggle('hide',!adminUser);document.getElementById('admin').classList.toggle('hide',!adminUser);adminPanel.classList.toggle('show',adminUser);adminLocked.classList.toggle('hide',true);if(!adminUser&&location.hash==='#admin')location.hash='home'}function logoutUser(){currentUser=null;localStorage.removeItem('samangile_user');loadCart();updateUserUI();renderCart();toast('Logged out successfully');if(location.hash==='#admin')location.hash='home'}function driveImageUrl(value){const raw=String(value||'').trim();if(!raw)return '';let id='';let m=raw.match(/\/d\/([a-zA-Z0-9_-]+)/);if(m)id=m[1];if(!id){m=raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);if(m)id=m[1];}if(!id&&/^[a-zA-Z0-9_-]{20,}$/.test(raw))id=raw;if(id)return 'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w1000';return raw}function imgSrc(p){const driveId=p.DriveFileID||p.driveFileId||p['Drive File ID']||p.FileID||'';return driveImageUrl(p.ImageURL||p.ImageUrl||p.imageUrl||p['Image URL']||p.Image||driveId)||'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=900&auto=format&fit=crop'}function productId(p){return p.ProductID||p.ProductId||p.ID||p.SKU||p.Name}
-function initUI(){renderCategories();renderCart();updateUserUI();loadProducts();initPayPal()}function renderCategories(){const opts=CATEGORIES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');categoryFilter.innerHTML='<option value="">All categories</option>'+opts;adminCategory.innerHTML=opts;categoryDropdown.innerHTML=CATEGORIES.map(c=>`<a href="#shop" onclick="selectCategory('${jsq(c)}')">${CATEGORY_EMOJI[c]||'🛍️'} ${esc(c)}</a>`).join('');footerCategories.innerHTML=CATEGORIES.map(c=>`<a href="#shop" onclick="selectCategory('${jsq(c)}')">${esc(c)}</a>`).join('');categoryGrid.innerHTML=CATEGORIES.map(c=>`<div class="cat-card" onclick="selectCategory('${jsq(c)}')"><span class="emoji">${CATEGORY_EMOJI[c]||'🛍️'}</span><h3>${esc(c)}</h3><p>View section →</p></div>`).join('')}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}function selectCategory(cat){categoryFilter.value=cat;location.hash='shop';renderProducts()}
-async function loadProducts(){const stopSync=startSync();try{if(hasServer()){let pj;if(typeof google!=='undefined'&&google.script&&google.script.run){pj=await runServer('getProducts',{sheetId:PRODUCT_SHEET_ID,tab:PRODUCT_TAB,headings:PRODUCT_HEADINGS});}else{let pr=await fetch(`${backendUrl()}?action=products&sheetId=${encodeURIComponent(PRODUCT_SHEET_ID)}&tab=${encodeURIComponent(PRODUCT_TAB)}&headings=${encodeURIComponent(PRODUCT_HEADINGS.join(','))}&_=${Date.now()}`);pj=await pr.json();}products=normalizeProducts(Array.isArray(pj)?pj:(pj.data||[]));let cats=[...new Set(products.map(x=>x.Category).filter(Boolean))];if(cats.length){CATEGORIES=[...new Set([...CATEGORIES,...cats])];renderCategories()}}else products=demoProducts()}catch(e){products=demoProducts();toast('Could not load live products. Showing local sample products.')}finally{stopSync()}renderProducts();renderHighlights();populateEditProducts()}function normalizeProducts(rows){return (rows||[]).map(r=>{let o={};PRODUCT_HEADINGS.forEach(h=>o[h]=r[h]??'');return o})}function demoProducts(){const data=[];const imgs={
+function initUI(){renderCategories();renderCart();updateUserUI();loadProducts();}function renderCategories(){const opts=CATEGORIES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');categoryFilter.innerHTML='<option value="">All categories</option>'+opts;adminCategory.innerHTML=opts;categoryDropdown.innerHTML=CATEGORIES.map(c=>`<a href="#shop" onclick="selectCategory('${jsq(c)}')">${CATEGORY_EMOJI[c]||'🛍️'} ${esc(c)}</a>`).join('');footerCategories.innerHTML=CATEGORIES.map(c=>`<a href="#shop" onclick="selectCategory('${jsq(c)}')">${esc(c)}</a>`).join('');categoryGrid.innerHTML=CATEGORIES.map(c=>`<div class="cat-card" onclick="selectCategory('${jsq(c)}')"><span class="emoji">${CATEGORY_EMOJI[c]||'🛍️'}</span><h3>${esc(c)}</h3><p>View section →</p></div>`).join('')}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}function selectCategory(cat){categoryFilter.value=cat;location.hash='shop';renderProducts()}
+async function loadProducts(){const stopSync=startSync();try{if(hasServer()){let pj;if(typeof google!=='undefined'&&google.script&&google.script.run){pj=await runServer('getProducts',{sheetId:PRODUCT_SHEET_ID,tab:PRODUCT_TAB,headings:PRODUCT_HEADINGS});}else{let pr=await fetch(`${backendUrl()}?action=products&sheetId=${encodeURIComponent(PRODUCT_SHEET_ID)}&tab=${encodeURIComponent(PRODUCT_TAB)}&headings=${encodeURIComponent(PRODUCT_HEADINGS.join(','))}&_=${Date.now()}`);pj=await pr.json();}products=normalizeProducts(Array.isArray(pj)?pj:(pj.data||[]));let cats=[...new Set(products.map(x=>x.Category).filter(Boolean))];if(cats.length){CATEGORIES=[...new Set([...CATEGORIES,...cats])];renderCategories()}}else products=demoProducts()}catch(e){products=demoProducts();toast('Could not load live products. Showing local sample products.')}finally{stopSync()}renderProducts();renderHighlights();populateEditProducts();setTimeout(initPayPal,1000);}
+function normalizeProducts(rows){return (rows||[]).map(r=>{let o={};PRODUCT_HEADINGS.forEach(h=>o[h]=r[h]??'');return o})}
+function demoProducts(){const data=[];const imgs={
 'Clothing':['photo-1441984904996-e0b6ba687e04','photo-1489987707025-afc232f7ea0f','photo-1483985988355-763728e1935b','photo-1523381210434-271e8be1f52b','photo-1515886657613-9f3515b0c78f'],
 'Electronics':['photo-1498049794561-7780e7231661','photo-1516321318423-f06f85e504b3','photo-1505740420928-5e560c06d30e','photo-1517336714731-489689fd1ca8','photo-1526738549149-8e07eca6c147'],
 'Stationery':['photo-1456735190827-d1262f71b8a3','photo-1517971129774-8a2b38fa128e','photo-1517842645767-c639042777db','photo-1497032628192-86f99bcd76bc','photo-1484480974693-6ca0a78fb36b'],
@@ -58,8 +60,173 @@ async function loadProducts(){const stopSync=startSync();try{if(hasServer()){let
 'Household (Miscellaneous)':['photo-1556228453-efd6c1ff04f6','photo-1513519245088-0e12902e5a38','photo-1526170375885-4d8ecf77b99f','photo-1586023492125-27b2c045efd7','photo-1505693416388-ac5ce068fe85']};
 Object.keys(imgs).forEach(cat=>imgs[cat].forEach((id,i)=>data.push({ProductID:`${cat.slice(0,3).toUpperCase()}-${i+1}`,SKU:`${cat.replace(/\W/g,'').toUpperCase()}-${i+1}`,Name:`${cat} Item ${i+1}`,Category:cat,Price:149+(i+1)*45,Stock:Math.max(2,30-i),SalesCount:(i*4)%19,Description:`Quality ${cat.toLowerCase()} product for Samangile Investments & Projects.`,ImageURL:`https://images.unsplash.com/${id}?q=80&w=900&auto=format&fit=crop`,CreatedAt:new Date(Date.now()-i*86400000).toISOString()})));return data}
 function renderProducts(){const q=searchInput.value.toLowerCase(),cat=categoryFilter.value,sort=sortFilter.value;let items=products.filter(p=>(!cat||String(p.Category||'')===cat)&&(`${p.Name||''} ${p.Description||''} ${p.Category||''}`.toLowerCase().includes(q)));if(sort==='low')items.sort((a,b)=>Number(a.Price||0)-Number(b.Price||0));if(sort==='high')items.sort((a,b)=>Number(b.Price||0)-Number(a.Price||0));if(sort==='popular')items.sort((a,b)=>Number(b.SalesCount||0)-Number(a.SalesCount||0));productGrid.innerHTML=items.length?items.map(productCard).join(''):'<div class="empty">No products found.</div>'}function productCard(p){return `<article class="product"><div class="product-img"><img src="${esc(imgSrc(p))}" alt="${esc(p.Name||'Product')}"></div><div class="product-body"><span class="badge">${esc(p.Category||'Product')}</span><h3>${esc(p.Name||'Unnamed product')}</h3><div class="meta">${esc(p.Description||'Available now')} · Stock: ${esc(p.Stock||0)}</div><div class="price">${money(p.Price)}</div><div class="product-actions"><button class="btn primary" onclick='addToCart(${JSON.stringify(productId(p))})'>Add to cart</button><button class="btn" onclick='quickWhatsApp(${JSON.stringify(productId(p))})'>Ask</button></div></div></article>`}function renderHighlights(){const bySales=[...products].sort((a,b)=>Number(b.SalesCount||0)-Number(a.SalesCount||0));const newItems=[...products].sort((a,b)=>new Date(b.CreatedAt||0)-new Date(a.CreatedAt||0));const least=[...products].sort((a,b)=>Number(a.SalesCount||0)-Number(b.SalesCount||0));popularGrid.innerHTML=bySales.slice(0,3).map(productCard).join('')||'<div class="empty">No data</div>';newGrid.innerHTML=newItems.slice(0,3).map(productCard).join('')||'<div class="empty">No data</div>';leastGrid.innerHTML=least.slice(0,3).map(productCard).join('')||'<div class="empty">No data</div>'}
-function getProduct(id){return products.find(p=>String(productId(p))===String(id))}function addToCart(id){const p=getProduct(id);if(!p)return;let item=cart.find(i=>String(i.id)===String(id));if(item)item.qty++;else cart.push({id,qty:1});saveCart();toast('Added to cart')}function saveCart(){localStorage.setItem(cartStorageKey(),JSON.stringify(cart));renderCart()}function clearCart(){cart=[];saveCart();toast('Cart cleared')}function renderCart(){cartCount.textContent=cart.reduce((s,i)=>s+i.qty,0);let total=0;cartItems.innerHTML=cart.length?cart.map(i=>{const p=getProduct(i.id)||{};const sub=Number(p.Price||0)*i.qty;total+=sub;return `<div class="cart-item"><img src="${esc(imgSrc(p))}"><div><b>${esc(p.Name||i.id)}</b><div class="meta">${money(p.Price)} each</div><div class="qty"><button onclick="changeQty('${jsq(i.id)}',-1)">−</button><span>${i.qty}</span><button onclick="changeQty('${jsq(i.id)}',1)">+</button></div></div><button class="icon-btn" onclick="removeCart('${jsq(i.id)}')">🗑️</button></div>`}).join(''):'<div class="empty">Your cart is empty.</div>';document.getElementById('cartTotal').textContent=money(total)}function totalCart(){return cart.reduce((s,i)=>{const p=getProduct(i.id)||{};return s+Number(p.Price||0)*i.qty},0)}function changeQty(id,d){let item=cart.find(i=>String(i.id)===String(id));if(!item)return;item.qty+=d;if(item.qty<=0)cart=cart.filter(i=>String(i.id)!==String(id));saveCart()}function removeCart(id){cart=cart.filter(i=>String(i.id)!==String(id));saveCart()}function openCart(){overlay.classList.add('show');cartDrawer.classList.add('open');renderCart()}function closeCart(){overlay.classList.remove('show');cartDrawer.classList.remove('open')}function closeAll(){overlay.classList.remove('show');cartDrawer.classList.remove('open');loginModal.classList.remove('show');checkoutModal.classList.remove('show')}function openLogin(){overlay.classList.add('show');loginModal.classList.add('show')}function openCheckout(){if(!cart.length)return toast('Cart is empty.');checkoutLines.innerHTML=cart.map(i=>{const p=getProduct(i.id)||{};return `${i.qty} × ${esc(p.Name||i.id)} - ${money(Number(p.Price||0)*i.qty)}`}).join('<br>')+`<hr style="margin:10px 0"><b>Total: ${money(totalCart())}</b>`;overlay.classList.add('show');checkoutModal.classList.add('show')}function quickWhatsApp(id){const p=getProduct(id);window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi Samangile Investments & Projects, I am interested in: '+(p?.Name||id))}`,'_blank')}
-async function checkout(method){const stopSync=startSync();if(!cart.length){stopSync();return toast('Cart is empty.')}const order={orderId:'SI-'+Date.now(),customerName:checkoutName.value||currentUser?.Name||'',phone:checkoutPhone.value,email:checkoutEmail.value||currentUser?.Email||'',address:checkoutAddress.value,paymentMethod:method,paymentStatus:method==='PayPal'?'Paid':'Pending',total:totalCart(),items:cart.map(i=>{const p=getProduct(i.id)||{};return{id:i.id,name:p.Name,category:p.Category,price:p.Price,qty:i.qty}})};if(!order.customerName)return toast('Please enter customer name.');try{if(hasServer())await postBackend('order',order)}catch(e){console.warn(e)}const msg=`New Samangile Investments & Projects order%0AOrder: ${order.orderId}%0AName: ${order.customerName}%0APayment: ${method}%0ATotal: ${money(order.total)}%0AItems:%0A`+order.items.map(i=>`${i.qty} x ${i.name} - ${money(Number(i.price)*i.qty)}`).join('%0A');window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,'_blank');cart=[];saveCart();closeAll();alert('Thank you! Your transaction/order was successful. Samangile Investments & Projects will contact you shortly.');stopSync()}function initPayPal(){if(!window.paypal)return;try{paypal.Buttons({createOrder:(d,a)=>a.order.create({purchase_units:[{amount:{currency_code:'ZAR',value:totalCart().toFixed(2)}}]}),onApprove:async(d,a)=>{await a.order.capture();checkout('PayPal')}}).render('#paypal-button-container')}catch(e){document.getElementById('paypal-button-container').innerHTML='<small>PayPal activates after replacing the client ID.</small>'}}
+function getProduct(id){return products.find(p=>String(productId(p))===String(id))}function addToCart(id){const p=getProduct(id);if(!p)return;let item=cart.find(i=>String(i.id)===String(id));if(item)item.qty++;else cart.push({id,qty:1});saveCart();toast('Added to cart')}function saveCart(){localStorage.setItem(cartStorageKey(),JSON.stringify(cart));renderCart()}function clearCart(){cart=[];saveCart();toast('Cart cleared')}function renderCart(){cartCount.textContent=cart.reduce((s,i)=>s+i.qty,0);let total=0;cartItems.innerHTML=cart.length?cart.map(i=>{const p=getProduct(i.id)||{};const sub=Number(p.Price||0)*i.qty;total+=sub;return `<div class="cart-item"><img src="${esc(imgSrc(p))}"><div><b>${esc(p.Name||i.id)}</b><div class="meta">${money(p.Price)} each</div><div class="qty"><button onclick="changeQty('${jsq(i.id)}',-1)">−</button><span>${i.qty}</span><button onclick="changeQty('${jsq(i.id)}',1)">+</button></div></div><button class="icon-btn" onclick="removeCart('${jsq(i.id)}')">🗑️</button></div>`}).join(''):'<div class="empty">Your cart is empty.</div>';document.getElementById('cartTotal').textContent=money(total)}function totalCart(){return cart.reduce((s,i)=>{const p=getProduct(i.id)||{};return s+Number(p.Price||0)*i.qty},0)}function changeQty(id,d){let item=cart.find(i=>String(i.id)===String(id));if(!item)return;item.qty+=d;if(item.qty<=0)cart=cart.filter(i=>String(i.id)!==String(id));saveCart()}function removeCart(id){cart=cart.filter(i=>String(i.id)!==String(id));saveCart()}function openCart(){overlay.classList.add('show');cartDrawer.classList.add('open');renderCart()}function closeCart(){overlay.classList.remove('show');cartDrawer.classList.remove('open')}function closeAll(){destroyPayPalButtons();overlay.classList.remove('show');cartDrawer.classList.remove('open');loginModal.classList.remove('show');checkoutModal.classList.remove('show')}function openLogin(){overlay.classList.add('show');loginModal.classList.add('show')}function quickWhatsApp(id){const p=getProduct(id);window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi Samangile Investments & Projects, I am interested in: '+(p?.Name||id))}`,'_blank')}
+
+// Updated checkout function
+async function checkout(method) {
+  if (!cart.length) return toast('Cart is empty.');
+
+  const order = {
+    orderId: 'SI-' + Date.now(),
+    customerName: checkoutName.value?.trim() || currentUser?.Name || '',
+    phone: checkoutPhone.value?.trim() || '',
+    email: checkoutEmail.value?.trim() || currentUser?.Email || '',
+    address: checkoutAddress.value?.trim() || '',
+    paymentMethod: method,
+    paymentStatus: method.includes('PayPal') ? 'Paid' : 'Pending',
+    total: totalCart(),
+    items: cart.map(i => {
+      const p = getProduct(i.id) || {};
+      return { id: i.id, name: p.Name || i.id, category: p.Category, price: p.Price, qty: i.qty };
+    })
+  };
+
+  if (!order.customerName) {
+    toast('Please enter customer name.');
+    return;
+  }
+
+  // WhatsApp notification
+  const msg = `New Samangile Order%0AOrder: ${order.orderId}%0AName: ${order.customerName}%0APayment: ${method}%0ATotal: ${money(order.total)}%0AItems:%0A` +
+    order.items.map(i => `${i.qty} x ${i.name} - ${money(Number(i.price) * i.qty)}`).join('%0A');
+
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+
+  // Clear cart
+  cart = [];
+  saveCart();
+  closeAll();
+
+  alert('✅ Thank you! Your order was received. Samangile Investments & Projects will contact you shortly.');
+}
+
+// ============================================================
+// IMPROVED PAYPAL INTEGRATION (ZAR → USD)
+// ============================================================
+
+let paypalButtonsInstance = null;
+
+// Multiple fallback exchange rate sources
+async function getRate() {
+  const fallbacks = [
+    () => fetch("https://api.exchangerate-api.com/v4/latest/ZAR").then(r => r.ok ? r.json() : Promise.reject()),
+    () => fetch("https://open.er-api.com/v6/latest/ZAR").then(r => r.ok ? r.json() : Promise.reject()),
+  ];
+
+  for (const fn of fallbacks) {
+    try {
+      const data = await fn();
+      const rate = data.rates?.USD || data.conversion_rates?.USD;
+      if (rate && rate > 0) return rate;
+    } catch (e) {}
+  }
+
+  console.warn('All exchange rate APIs failed - using fallback 0.055');
+  return 0.055; // ~18.18 ZAR = 1 USD
+}
+
+function destroyPayPalButtons() {
+  if (paypalButtonsInstance) {
+    try { paypalButtonsInstance.close(); } catch(e){}
+    paypalButtonsInstance = null;
+  }
+}
+
+function initPayPal() {
+  const container = document.getElementById('paypal-button-container');
+  if (!container) return;
+
+  destroyPayPalButtons();
+  container.innerHTML = '<small style="color:#666;">Loading PayPal...</small>';
+
+  if (typeof paypal === 'undefined') {
+    setTimeout(initPayPal, 800);
+    return;
+  }
+
+  if (!cart || cart.length === 0) {
+    container.innerHTML = '<small style="color:#666;">Cart is empty</small>';
+    return;
+  }
+
+  const zarTotal = totalCart();
+
+  paypal.Buttons({
+    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+
+    createOrder: async (data, actions) => {
+      try {
+        const rate = await getRate();
+        let usdAmount = zarTotal * rate;
+        if (usdAmount < 1) usdAmount = 1;
+
+        const finalUsd = usdAmount.toFixed(2);
+
+        console.log(`💱 ZAR ${zarTotal.toFixed(2)} → USD ${finalUsd} (rate: ${rate})`);
+
+        return actions.order.create({
+          purchase_units: [{
+            description: 'Samangile Investments & Projects Order',
+            amount: { currency_code: "USD", value: finalUsd },
+            custom_id: 'SI-' + Date.now()
+          }]
+        });
+      } catch (err) {
+        console.error(err);
+        toast('Failed to prepare PayPal payment. Try another method.');
+        throw err;
+      }
+    },
+
+    onApprove: async (data, actions) => {
+      try {
+        const details = await actions.order.capture();
+        const payerName = details.payer?.name?.given_name || 'Customer';
+
+        toast(`✅ Payment successful! Thank you ${payerName}`);
+
+        // Complete order flow
+        checkout('PayPal (USD)');
+
+      } catch (err) {
+        console.error('Capture error:', err);
+        toast('Payment failed to complete. Please contact us.');
+      }
+    },
+
+    onCancel: () => toast('Payment cancelled.'),
+    onError: (err) => {
+      console.error(err);
+      toast('PayPal error occurred. Please try EFT/Cash on Delivery or refresh the page.');
+    }
+
+  }).render('#paypal-button-container')
+    .then(instance => {
+      paypalButtonsInstance = instance;
+    })
+    .catch(err => {
+      console.error(err);
+      container.innerHTML = `<small style="color:#dc2626;">PayPal failed to load.<br><button onclick="initPayPal()" class="btn small">Retry</button></small>`;
+    });
+}
+
+// Enhanced openCheckout
+function openCheckout() {
+  if (!cart.length) return toast('Cart is empty.');
+
+  checkoutLines.innerHTML = cart.map(i => {
+    const p = getProduct(i.id) || {};
+    return `${i.qty} × ${esc(p.Name || i.id)} - ${money(Number(p.Price||0) * i.qty)}`;
+  }).join('<br>') + 
+  `<hr style="margin:12px 0"><b>Total: ${money(totalCart())}</b>`;
+
+  overlay.classList.add('show');
+  checkoutModal.classList.add('show');
+
+  // Render PayPal after modal is visible
+  setTimeout(initPayPal, 300);
+}
+
 function runServer(functionName,payload){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[functionName](payload)})}async function postBackend(action,payload){const productActions=['products','addProduct','updateProduct','deleteProduct','uploadProductImage'];const request={action,payload,sheetId:PRODUCT_SHEET_ID,tab:PRODUCT_TAB};if(productActions.includes(action)){request.headings=PRODUCT_HEADINGS}if(typeof google!=='undefined'&&google.script&&google.script.run){return await runServer('handleAction',request)}const url=backendUrl();if(!url)throw new Error('Apps Script connection is not set. Deploy the matching Code.gs as a Web App and paste its URL into APPS_SCRIPT_URL, or serve this HTML from Apps Script.');const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(request)});const json=await res.json();if(json.success===false)throw new Error(json.message||'Backend error');return json}async function loginUser(){const stopSync=startSync();loginMessage.textContent='Synchronising login...';try{if(!loginEmail.value||!loginPassword.value)return toast('Email and password required.');const json=await postBackend('login',{email:loginEmail.value,password:loginPassword.value});currentUser=json.user;if(!currentUser)throw new Error('Invalid login response.');localStorage.setItem('samangile_user',JSON.stringify(currentUser));loadCart();updateUserUI();renderCart();closeAll();toast(`Logged in as ${currentUser.Name||currentUser.Email}`)}catch(e){loginMessage.textContent=e.message}finally{stopSync()}}async function registerClient(){const stopSync=startSync();try{const payload={Name:prompt('Your name:')||'',Email:loginEmail.value,Password:loginPassword.value,Role:'Client',Rights:'Client',Status:'Active'};if(!payload.Email||!payload.Password)return toast('Email and password required.');await postBackend('register',payload);toast('Client registered. You can login now.')}catch(e){toast(e.message)}finally{stopSync()}}async function registerAdmin(){const stopSync=startSync();try{const payload={Name:prompt('Admin name:')||'',Email:loginEmail.value,Password:loginPassword.value,Role:'Admin',Rights:'Admin',Status:'Active'};if(!payload.Email||!payload.Password)return toast('Email and password required.');await postBackend('register',payload);toast('Admin registered. You can login now.')}catch(e){toast(e.message)}finally{stopSync()}}async function backendInit(){const stopSync=startSync();try{const res=await postBackend('init',{});toast((res&&res.spreadsheetUrl)?'Backend tabs verified. Google Sheet connected.':'Backend tabs verified.')}catch(e){toast(e.message)}finally{stopSync()}}function fileToBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(file)})}function populateEditProducts(){editProduct.innerHTML='<option value="">New product</option>'+products.map(p=>`<option value="${esc(productId(p))}">${esc(p.Name||productId(p))}</option>`).join('')}function loadProductForEdit(){const p=getProduct(editProduct.value);if(!p)return;adminName.value=p.Name||'';adminCategory.value=p.Category||'';adminPrice.value=p.Price||'';adminStock.value=p.Stock||'';adminSku.value=p.SKU||'';adminDescription.value=p.Description||'';adminImageUrl.value=imgSrc(p)||''}async function saveProductAdmin(){const stopSync=startSync();if(!isAdmin()){stopSync();return toast('Admin rights required.')}let file=adminImage.files[0];let now=new Date().toISOString();let existing=getProduct(editProduct.value)||{};let payload={ProductID:editProduct.value||existing.ProductID||'',SKU:adminSku.value,Name:adminName.value,Category:adminCategory.value,Description:adminDescription.value,Price:adminPrice.value,Stock:adminStock.value,ImageURL:adminImageUrl.value||existing.ImageURL||'',DriveFileID:existing.DriveFileID||'',Status:existing.Status||'Active',SalesCount:existing.SalesCount||0,CreatedAt:existing.CreatedAt||now,UpdatedAt:now};if(newCategoryName.value){payload.Category=newCategoryName.value;if(!CATEGORIES.includes(payload.Category)){CATEGORIES.push(payload.Category);renderCategories()}}try{if(file){let upload=await postBackend('uploadProductImage',{ProductID:payload.ProductID,SKU:payload.SKU,Name:payload.Name,imageBase64:await fileToBase64(file),imageMimeType:file.type,imageName:file.name});payload.ImageURL=upload.ImageURL||upload.imageUrl||payload.ImageURL;payload.DriveFileID=upload.DriveFileID||upload.driveFileId||payload.DriveFileID}payload=Object.fromEntries(PRODUCT_HEADINGS.map(h=>[h,payload[h]??'']));await postBackend(editProduct.value?'updateProduct':'addProduct',payload);adminMessage.textContent='Product saved successfully.';adminImage.value='';await loadProducts()}catch(e){adminMessage.textContent=e.message}finally{stopSync()}}async function deleteProductAdmin(){const stopSync=startSync();if(!isAdmin()){stopSync();return toast('Admin rights required.')}const id=editProduct.value;if(!id){stopSync();return toast('Select an existing product to delete.')}const p=getProduct(id)||{};if(!confirm('Delete '+(p.Name||id)+' permanently from Google Sheet?')){stopSync();return}try{await postBackend('deleteProduct',{ProductID:id});products=products.filter(x=>String(productId(x))!==String(id));populateEditProducts();renderProducts();renderHighlights();editProduct.value='';adminMessage.textContent='Product deleted successfully.'}catch(e){adminMessage.textContent=e.message}finally{stopSync()}}async function addCategoryAdmin(){const stopSync=startSync();if(!isAdmin()){stopSync();return toast('Admin rights required.')}const name=newCategoryName.value.trim();if(!name){stopSync();return toast('Enter new category name.')}try{await postBackend('addCategory',{Category:name});if(!CATEGORIES.includes(name)){CATEGORIES.push(name);renderCategories()}toast('Category created.')}catch(e){toast(e.message)}finally{stopSync()}}async function loadSalesReport(){const stopSync=startSync();try{let json;if(hasServer())json=await postBackend('report',{period:reportPeriod.value});else json=demoReport(reportPeriod.value);reportSummary.innerHTML=`<b>${esc(json.periodLabel||reportPeriod.value)}</b> · Orders: ${json.orderCount||0} · Sales: ${money(json.totalSales||0)}`;reportTable.innerHTML='<thead><tr><th>Product</th><th>Category</th><th>Qty Sold</th><th>Total Sales</th></tr></thead><tbody>'+((json.items||[]).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.category)}</td><td>${esc(r.qty)}</td><td>${money(r.total)}</td></tr>`).join('')||'<tr><td colspan="4">No sales found</td></tr>')+'</tbody>'}catch(e){toast(e.message)}finally{stopSync()}}function demoReport(period){return{periodLabel:'Demo '+period,orderCount:4,totalSales:2450,items:[{name:'Clothing Item 1',category:'Clothing',qty:3,total:650},{name:'Electronics Item 2',category:'Electronics',qty:2,total:900},{name:'Stationery Item 1',category:'Stationery',qty:6,total:900}]}}function sendContactWhatsApp(){const msg=`Samangile Investments & Projects enquiry%0AName: ${contactName.value}%0AEmail: ${contactEmail.value}%0AMessage: ${contactMessage.value}`;window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,'_blank');if(hasServer())postBackend('contact',{name:contactName.value,email:contactEmail.value,message:contactMessage.value}).catch(()=>{})}
 initUI();
 </script>
